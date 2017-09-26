@@ -8,6 +8,8 @@
 # ()
 # 0123456789
 # .
+#test 26/09/2017 - 13:15
+
 
 '''
 AIDE MEMOIRE
@@ -61,10 +63,21 @@ Pour chaque bloc
 	séparer blocs et opérateurs (délicat)
 	au même niveau de parenthésage, isoler les opération prioritaire récursivement
 
+Regex :
+Numbers : -?[0-9]*(\.[0-9]+)?([e|E][+-]?[0-9]+)?
+functions : [a-z]+[0-9]*
+
+<b001> => blocks
+<n001> => numbers
+<f001> => functions
+
+1+(2*3) => <n001>+<b001>
+	<b001>.string = <n002>*<n003>
 
 
 '''
 
+import os
 import re
 import math
 from myprint import *
@@ -77,17 +90,29 @@ VALID_CHARS = [	"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 OPERATORS = 		[ "+", "-", "*", "/", "^", "E"]
 OPERATOR_PRIORITY = [  1,   1,   2,   2,   3,   4]
 
+# end of line:
+if os.name == 'posix':
+	eol = "\n"
+elif os.name == 'nt':
+	eol = "\r\n"
+
+
 # General purpose functions **************************************************
 
-def strInser(s_init, s_to_inser, pos):
+def strInser(s_init,pos, s_to_inser): # OK
 	if pos < 0 or pos > len(s_init)-1:
 		return s_init
-	return s_init[:pos] + s_to_inser + s_int[pos:]
+	return s_init[:pos] + s_to_inser + s_init[pos:]
 
-def strDel(s_init, pos, nchar=1):
+def strDel(s_init, pos, nchar=1): # OK
 	if pos < 0 or pos > len(s_init)-1:
 		return s_init
-	return s_init[:pos] + "" if pos+nchar > len(s_init) else s_init[pos+nchar:]
+	return s_init[:pos] + ("" if pos+nchar > len(s_init) else s_init[pos+nchar:])
+
+def strRepl(s_init, pos, nchar, s_to_inser): # OK
+	if pos < 0 or pos > len(s_init)-1:
+		return s_init
+	return s_init[:pos] + s_to_inser + s_init[(pos+nchar):]
 
 
 
@@ -180,6 +205,12 @@ def doCommonReplacements(s): # OK
 			s = regexp.sub(REPLACE_WITH[i], s)
 			f = regexp.search(s)
 	return s
+
+
+def replaceBlocks(s):
+	# regex for finding numbers (decimals, floats, all of them except hexa)
+	numreg = "-?[0-9]*(\\.[0-9]+)?([e|E][+-]?[0-9]+)?"
+
 
 class block:
 	'''
@@ -296,7 +327,7 @@ if __name__ == '__main__':
 	fi = open("unitTests.txt", "r")
 	content = fi.read()
 	fi.close()
-	tests = content.split("\n")
+	tests = content.split(eol)
 
 	i=1
 	for t in tests:
