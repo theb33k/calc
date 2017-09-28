@@ -22,3 +22,4 @@ a+z-e*r/t^yEu.0123456789(i) opqsdfghjklmwxcvbn
 1-----2
 (-)
 (a)
+(12+.5)*(2^3)
